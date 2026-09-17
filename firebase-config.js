@@ -5,12 +5,12 @@
 // configuration -> Config. See README.md for the full walkthrough.
 // ============================================================
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY_HERE",
-  authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID"
+  apiKey: "AIzaSyCiwppMuKqFux8gIBXhTonyMjQ-fv9-gI4",
+  authDomain: "wishwell-riri.firebaseapp.com",
+  projectId: "wishwell-riri",
+  storageBucket: "wishwell-riri.firebasestorage.app",
+  messagingSenderId: "779122226506",
+  appId: "1:779122226506:web:f8b210bef261251ab0bdb3"
 };
 
 // The email used for Reet's login. Firebase Auth needs an email shape,
