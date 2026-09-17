@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riri's Wishlist — WishWell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="starfield" id="starfield" aria-hidden="true"></div>
+
+<div id="app">
+  <header class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" style="color:var(--coin-bright);">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M8 13L24 4L40 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 13V25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M40 13V25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M24 7V27" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <path d="M5 29C5 35.5 13.5 40 24 40C34.5 40 43 35.5 43 29" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="24" cy="29" rx="19" ry="8" stroke="currentColor" stroke-width="3"/>
+          <circle class="mini-ripple" cx="24" cy="29" r="6" fill="none" stroke="var(--ember)" stroke-width="1"/>
+          <ellipse cx="24" cy="29" rx="12.5" ry="4.5" fill="currentColor" opacity="0.5"/>
+        </svg>
+      </div>
+      <span>WishWell</span>
+    </div>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="login.html">
+        <svg viewBox="0 0 24 24" stroke-width="1.8" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+        Reet's login
+      </a>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="top-row">
+      <div>
+        <h1 class="serif" id="wishHeading">Riri's Wishlist</h1>
+        <p class="subtitle" id="wishSub">Everything they're hoping for — pick something and make it real.</p>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="tabs">
+        <button class="tab active" data-filter="all">All</button>
+        <button class="tab" data-filter="active">Still wishing</button>
+        <button class="tab" data-filter="purchased">Got it</button>
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="newest">Newest first</option>
+        <option value="want_high">Most wanted first</option>
+        <option value="price_low">Price: low to high</option>
+        <option value="price_high">Price: high to low</option>
+      </select>
+    </div>
+
+    <div id="loadingState" class="empty">Loading wishes…</div>
+    <div class="grid hidden" id="itemGrid"></div>
+    <div class="empty hidden" id="emptyState">
+      <svg viewBox="0 0 48 48" fill="none" style="color:var(--coin-bright);">
+        <path d="M8 13L24 4L40 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 13V25" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M40 13V25" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M24 7V27" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        <path d="M5 29C5 35.5 13.5 40 24 40C34.5 40 43 35.5 43 29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="24" cy="29" rx="19" ry="8" stroke="currentColor" stroke-width="2.5"/>
+        <ellipse cx="24" cy="29" rx="12.5" ry="4.5" fill="currentColor" opacity="0.4"/>
+      </svg>
+      <h3>The well is quiet</h3>
+      <p>No wishes here yet — check back soon.</p>
+    </div>
+    <div id="errorState" class="empty hidden">Couldn't load the wishlist. Try refreshing.</div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="data.js"></script>
+<script src="wishwell.js"></script>
+<script>
+(function(){
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  WishWell.initStarfield($("starfield"));
+
+  let items = [];
+  let currentFilter = "all";
+  let currentSort = "newest";
+
+  function fmtPrice(price){ return "₹" + (Number(price)||0).toLocaleString("en-IN"); }
+  function budgetBadge(price){ price=Number(price)||0; if(price===0) return "No price set"; if(price<500) return "Under ₹500"; if(price<1500) return "₹500 – ₹1,500"; if(price<5000) return "₹1,500 – ₹5,000"; return "₹5,000+"; }
+  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  const starSvg = (filled) => `<svg viewBox="0 0 24 24" class="${filled?'filled':''}" stroke-width="1.6"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg>`;
+  function wantStars(level){
+    level = Math.max(1, Math.min(5, Number(level)||3));
+    let html = '<div class="want-stars">';
+    for(let i=1;i<=5;i++) html += starSvg(i<=level);
+    return html + '</div>';
+  }
+
+  Array.from(document.querySelectorAll(".tab")).forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      Array.from(document.querySelectorAll(".tab")).forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+      currentFilter = tab.dataset.filter;
+      render();
+    });
+  });
+  $("sortSelect").addEventListener("change", (e)=>{ currentSort = e.target.value; render(); });
+
+  function render(){
+    let list = items.filter(it=>{
+      if(currentFilter==="active") return !it.purchased;
+      if(currentFilter==="purchased") return it.purchased;
+      return true;
+    });
+    list = list.slice().sort((a,b)=>{
+      if(currentSort==="price_low") return (a.price||0) - (b.price||0);
+      if(currentSort==="price_high") return (b.price||0) - (a.price||0);
+      if(currentSort==="want_high") return (b.want||3) - (a.want||3);
+      const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+      const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+      return bt - at;
+    });
+
+    const grid = $("itemGrid");
+    grid.innerHTML = "";
+    if(list.length === 0){
+      grid.classList.add("hidden");
+      $("emptyState").classList.remove("hidden");
+      return;
+    }
+    grid.classList.remove("hidden");
+    $("emptyState").classList.add("hidden");
+
+    list.forEach((it, idx)=>{
+      const card = document.createElement("div");
+      card.className = "card card-enter" + (it.purchased ? " purchased" : "");
+      card.style.animationDelay = (idx*45)+"ms";
+      const img = it.image
+        ? `<img class="card-img" src="${it.image}" alt="${escapeHtml(it.title)}">`
+        : `<div class="card-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg></div>`;
+      const linkHtml = it.link
+        ? `<a class="link-btn" href="${escapeHtml(it.link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>View</a>`
+        : `<span style="font-size:0.78rem; color:var(--ink-soft);">No link added</span>`;
+
+      card.innerHTML = `
+        ${img}
+        <div class="card-body">
+          <div class="card-meta">
+            ${wantStars(it.want)}
+            ${it.purchased ? '<span class="badge got-badge">Already got it</span>' : `<span class="badge">${budgetBadge(it.price)}</span>`}
+          </div>
+          <h3 class="card-title">${escapeHtml(it.title)}</h3>
+          <div class="card-meta"><span class="price">${fmtPrice(it.price)}</span></div>
+          ${it.note ? `<p class="card-note">${escapeHtml(it.note)}</p>` : ""}
+          <div class="card-actions">${linkHtml}</div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  async function boot(){
+    try{
+      const [profile, loadedItems] = await Promise.all([WishData.getProfile(), WishData.getItems()]);
+      document.title = profile.displayName + "'s Wishlist — WishWell";
+      $("wishHeading").textContent = profile.displayName + "'s Wishlist";
+      items = loadedItems;
+      $("loadingState").classList.add("hidden");
+      render();
+    }catch(err){
+      console.error(err);
+      $("loadingState").classList.add("hidden");
+      $("errorState").classList.remove("hidden");
+    }
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

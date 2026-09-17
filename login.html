@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — WishWell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="starfield" id="starfield" aria-hidden="true"></div>
+
+<div class="auth-screen">
+  <div class="well-hero" aria-hidden="true">
+    <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+      <path class="well-roof" d="M110 55 L200 20 L290 55"/>
+      <path class="well-post" d="M110 55 L110 110"/>
+      <path class="well-post" d="M290 55 L290 110"/>
+      <path class="well-rope" d="M200 26 L200 118"/>
+      <g class="well-glow">
+        <circle class="ripple-ring" cx="200" cy="122" r="20"/>
+        <circle class="ripple-ring r2" cx="200" cy="122" r="20"/>
+        <circle class="ripple-ring r3" cx="200" cy="122" r="20"/>
+      </g>
+      <ellipse class="well-rim" cx="200" cy="122" rx="95" ry="34"/>
+      <ellipse class="well-water well-glow" cx="200" cy="122" rx="66" ry="20"/>
+      <path class="well-base" d="M105 130 C105 165 295 165 295 130"/>
+      <circle class="well-star" cx="60" cy="40" r="2"/>
+      <circle class="well-star" cx="340" cy="70" r="2.4"/>
+      <circle class="well-star" cx="95" cy="90" r="1.6"/>
+      <circle class="well-spark" cx="180" cy="118" r="2.2"/>
+      <circle class="well-spark s2" cx="210" cy="120" r="1.8"/>
+      <circle class="well-spark s3" cx="195" cy="115" r="1.4"/>
+      <circle class="well-spark s4" cx="225" cy="122" r="2"/>
+    </svg>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-mark">
+      <svg viewBox="0 0 48 48" fill="none" style="color:var(--coin-deep);">
+        <path d="M8 13L24 4L40 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 13V25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M40 13V25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M24 7V27" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        <path d="M5 29C5 35.5 13.5 40 24 40C34.5 40 43 35.5 43 29" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <ellipse cx="24" cy="29" rx="19" ry="8" stroke="currentColor" stroke-width="3"/>
+        <ellipse cx="24" cy="29" rx="12.5" ry="4.5" fill="currentColor" opacity="0.5"/>
+      </svg>
+    </div>
+    <h1>Reet's login</h1>
+    <p class="auth-sub">Only Reet can get past here.</p>
+    <div class="auth-error" id="authError"></div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn">Log in</button>
+
+    <div class="auth-switch">
+      <a href="index.html">← Back to the public wishlist</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="wishwell.js"></script>
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  WishWell.initStarfield($("starfield"));
+
+  function showError(msg){
+    const el = $("authError");
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+
+  function login(){
+    const password = $("password").value;
+    if(!password){ showError("Enter the password."); return; }
+    $("loginBtn").disabled = true;
+
+    auth.signInWithEmailAndPassword(REET_EMAIL, password)
+      .then(()=>{
+        WishWell.magicFromElement($("loginBtn"));
+        setTimeout(()=>{ window.location.href = "app.html"; }, 420);
+      })
+      .catch((err)=>{
+        console.error(err);
+        showError("Incorrect password.");
+        $("loginBtn").disabled = false;
+      });
+  }
+
+  $("loginBtn").addEventListener("click", login);
+  $("password").addEventListener("keydown", (e)=>{ if(e.key === "Enter") login(); });
+
+  // If already logged in on this browser, skip straight to the editor.
+  auth.onAuthStateChanged((user)=>{
+    if(user) window.location.href = "app.html";
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WishWell — edit your wishlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="starfield" id="starfield" aria-hidden="true"></div>
+
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark" style="color:var(--coin-bright);">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M8 13L24 4L40 13" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 13V25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M40 13V25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M24 7V27" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <path d="M5 29C5 35.5 13.5 40 24 40C34.5 40 43 35.5 43 29" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="24" cy="29" rx="19" ry="8" stroke="currentColor" stroke-width="3"/>
+          <circle class="mini-ripple" cx="24" cy="29" r="6" fill="none" stroke="var(--ember)" stroke-width="1"/>
+          <ellipse cx="24" cy="29" rx="12.5" ry="4.5" fill="currentColor" opacity="0.5"/>
+        </svg>
+      </div>
+      <span>WishWell</span>
+    </div>
+    <button class="menu-toggle" id="menuToggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="wishlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg>
+        Wishlist
+      </button>
+      <button class="nav-item" data-page="profile">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        Profile
+      </button>
+      <a class="nav-item" href="index.html" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" stroke-width="1.8" fill="none" stroke="currentColor"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        View public page
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="mini-profile">
+        <div class="avatar" id="miniAvatar"></div>
+        <div class="names"><div class="name" id="miniName"></div><div class="user">@reet</div></div>
+      </div>
+      <button class="nav-item" id="logoutBtn">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section id="page-wishlist">
+      <div class="top-row">
+        <div>
+          <h1 class="serif" id="wishHeading">Your wishlist</h1>
+          <p class="subtitle">Everything you're hoping for, in one place.</p>
+        </div>
+        <button class="btn btn-primary" id="addItemBtn">+ Make a wish</button>
+      </div>
+
+      <div class="controls-row">
+        <div class="tabs">
+          <button class="tab active" data-filter="all">All</button>
+          <button class="tab" data-filter="active">Still wishing</button>
+          <button class="tab" data-filter="purchased">Got it</button>
+        </div>
+        <select class="sort-select" id="sortSelect">
+          <option value="newest">Newest first</option>
+          <option value="want_high">Most wanted first</option>
+          <option value="price_low">Price: low to high</option>
+          <option value="price_high">Price: high to low</option>
+        </select>
+      </div>
+
+      <div id="loadingState" class="empty">Loading your wishes…</div>
+      <div class="grid hidden" id="itemGrid"></div>
+      <div class="empty hidden" id="emptyState">
+        <svg viewBox="0 0 48 48" fill="none" style="color:var(--coin-bright);">
+          <path d="M8 13L24 4L40 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 13V25" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M40 13V25" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M24 7V27" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <path d="M5 29C5 35.5 13.5 40 24 40C34.5 40 43 35.5 43 29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <ellipse cx="24" cy="29" rx="19" ry="8" stroke="currentColor" stroke-width="2.5"/>
+          <circle class="mini-ripple" cx="24" cy="29" r="7" fill="none" stroke="var(--ember)" stroke-width="1"/>
+          <ellipse cx="24" cy="29" rx="12.5" ry="4.5" fill="currentColor" opacity="0.4"/>
+        </svg>
+        <h3>The well is quiet</h3>
+        <p>Make your first wish and it'll show up here.</p>
+        <button class="btn btn-primary" id="emptyAddBtn">+ Make a wish</button>
+      </div>
+    </section>
+
+    <section id="page-profile" class="hidden">
+      <div class="top-row">
+        <div><h1 class="serif">Profile</h1><p class="subtitle">This is what only you can see and edit.</p></div>
+      </div>
+
+      <div class="share-box">
+        <div class="label">Your public wishlist</div>
+        <div class="share-row">
+          <input type="text" id="shareLink" readonly>
+          <button class="btn btn-ghost" id="copyShareBtn">Copy link</button>
+        </div>
+        <p class="share-note">This link always shows your current wishlist live — anyone can open it, no login needed, and it updates the moment you change something here.</p>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-avatar-row">
+          <div class="avatar-lg" id="profileAvatarBig"></div>
+          <div>
+            <div style="font-weight:600; margin-bottom:4px;" id="profileNameDisplay"></div>
+            <div style="font-size:0.85rem; color:var(--ink-soft); margin-bottom:8px;">@reet</div>
+            <label class="avatar-upload-btn">Change photo<input type="file" id="avatarInput" accept="image/*" class="hidden"></label>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat"><div class="num" id="statTotal">0</div><div class="label">wishlist items</div></div>
+          <div class="stat"><div class="num" id="statGot">0</div><div class="label">got it</div></div>
+          <div class="stat"><div class="num" id="statSpend">₹0</div><div class="label">still wishing (value)</div></div>
+        </div>
+
+        <div class="field"><label>Display name</label><input type="text" id="editDisplayName"></div>
+        <div class="field"><label>About</label><textarea id="editBio" rows="3" placeholder="A little about you..."></textarea></div>
+        <button class="btn btn-primary" id="saveProfileBtn">Save changes</button>
+        <div class="logout-row"><button class="btn btn-ghost" id="logoutBtn2" style="width:100%;">Log out</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-overlay hidden" id="itemModalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Make a wish</h2>
+    <label class="upload-zone" id="uploadZone">
+      <div id="uploadZoneContent">
+        <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+        <p>Upload a picture (optional)</p>
+      </div>
+      <input type="file" id="itemImageInput" accept="image/*">
+    </label>
+    <div class="field"><label>What is it?</label><input type="text" id="itemTitle" placeholder="e.g. Sage green tote bag"></div>
+    <div class="field"><label>Where it's available</label><input type="text" id="itemLink" placeholder="Paste a link (optional)"></div>
+    <div class="field"><label>Price (₹)</label><input type="number" id="itemPrice" placeholder="0" min="0"></div>
+    <div class="field">
+      <label>How much do you want this?</label>
+      <div class="want-picker" id="wantPicker"></div>
+    </div>
+    <div class="field"><label>Note (optional)</label><textarea id="itemNote" placeholder="Size, color, why you want it..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelModalBtn">Cancel</button>
+      <button class="btn btn-primary" id="saveItemBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="data.js"></script>
+<script src="wishwell.js"></script>
+<script>
+(function(){
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+  WishWell.initStarfield($("starfield"));
+
+  let me = { displayName: "Riri", bio: "", avatar: null };
+  let items = [];
+  let editingItemId = null;
+  let editingImageData = null;
+  let editingWant = 3;
+  let currentFilter = "all";
+  let currentSort = "newest";
+
+  function showToast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> t.classList.remove("show"), 2200);
+  }
+  function initials(name){ return (name||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||"").join(""); }
+  function fmtPrice(price){ return "₹" + (Number(price)||0).toLocaleString("en-IN"); }
+  function budgetBadge(price){ price=Number(price)||0; if(price===0) return "No price set"; if(price<500) return "Under ₹500"; if(price<1500) return "₹500 – ₹1,500"; if(price<5000) return "₹1,500 – ₹5,000"; return "₹5,000+"; }
+  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  const starSvg = () => `<svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg>`;
+  function wantStarsDisplay(level){
+    level = Math.max(1, Math.min(5, Number(level)||3));
+    let html = '<div class="want-stars">';
+    for(let i=1;i<=5;i++) html += `<svg viewBox="0 0 24 24" class="${i<=level?'filled':''}" stroke-width="1.6"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg>`;
+    return html + '</div>';
+  }
+
+  function renderWantPicker(){
+    const el = $("wantPicker");
+    el.innerHTML = "";
+    for(let i=1;i<=5;i++){
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = i<=editingWant ? "filled" : "";
+      btn.innerHTML = starSvg();
+      btn.addEventListener("click", ()=>{ editingWant = i; renderWantPicker(); });
+      el.appendChild(btn);
+    }
+    const label = document.createElement("span");
+    label.className = "want-picker-label";
+    label.textContent = editingWant + " / 5";
+    el.appendChild(label);
+  }
+
+  function logOut(){
+    auth.signOut().then(()=>{ window.location.href = "login.html"; });
+  }
+  $("logoutBtn").addEventListener("click", logOut);
+  $("logoutBtn2").addEventListener("click", logOut);
+
+  function refreshUserChrome(){
+    const av = me.avatar ? `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(me.displayName);
+    $("miniAvatar").innerHTML = av;
+    $("miniName").textContent = me.displayName;
+    $("wishHeading").textContent = me.displayName.split(" ")[0] + "'s Wishlist";
+  }
+
+  function goToPage(page){
+    qsa(".nav-item[data-page]").forEach(b=> b.classList.toggle("active", b.dataset.page===page));
+    $("page-wishlist").classList.toggle("hidden", page!=="wishlist");
+    $("page-profile").classList.toggle("hidden", page!=="profile");
+    if(page === "profile") renderProfile();
+    $("sidebar").classList.remove("open");
+  }
+  qsa(".nav-item[data-page]").forEach(btn=> btn.addEventListener("click", ()=> goToPage(btn.dataset.page)));
+  $("menuToggle").addEventListener("click", ()=> $("sidebar").classList.toggle("open"));
+
+  qsa(".tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      qsa(".tab").forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+      currentFilter = tab.dataset.filter;
+      renderWishlist();
+    });
+  });
+  $("sortSelect").addEventListener("change", (e)=>{ currentSort = e.target.value; renderWishlist(); });
+
+  async function reloadItems(){
+    items = await WishData.getItems();
+    renderWishlist();
+  }
+
+  function renderWishlist(){
+    let list = items.filter(it=>{
+      if(currentFilter==="active") return !it.purchased;
+      if(currentFilter==="purchased") return it.purchased;
+      return true;
+    });
+    list = list.slice().sort((a,b)=>{
+      if(currentSort==="price_low") return (a.price||0) - (b.price||0);
+      if(currentSort==="price_high") return (b.price||0) - (a.price||0);
+      if(currentSort==="want_high") return (b.want||3) - (a.want||3);
+      const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+      const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+      return bt - at;
+    });
+
+    const grid = $("itemGrid");
+    grid.innerHTML = "";
+    $("loadingState").classList.add("hidden");
+    if(list.length===0){
+      grid.classList.add("hidden");
+      $("emptyState").classList.remove("hidden");
+      return;
+    }
+    grid.classList.remove("hidden");
+    $("emptyState").classList.add("hidden");
+
+    list.forEach((it, idx)=>{
+      const card = document.createElement("div");
+      card.className = "card card-enter" + (it.purchased ? " purchased" : "");
+      card.style.animationDelay = (idx*45)+"ms";
+      const img = it.image
+        ? `<img class="card-img" src="${it.image}" alt="${escapeHtml(it.title)}">`
+        : `<div class="card-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg></div>`;
+      const linkHtml = it.link
+        ? `<a class="link-btn" href="${escapeHtml(it.link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>View</a>`
+        : `<span style="font-size:0.78rem; color:var(--ink-soft);">No link added</span>`;
+
+      card.innerHTML = `
+        ${img}
+        <div class="card-body">
+          <div class="card-meta">
+            ${wantStarsDisplay(it.want)}
+            <span class="badge">${budgetBadge(it.price)}</span>
+          </div>
+          <h3 class="card-title">${escapeHtml(it.title)}</h3>
+          <div class="card-meta"><span class="price">${fmtPrice(it.price)}</span></div>
+          ${it.note ? `<p class="card-note">${escapeHtml(it.note)}</p>` : ""}
+          <div class="card-actions">
+            ${linkHtml}
+            <div style="display:flex; gap:2px;">
+              <button class="icon-btn toggle-btn ${it.purchased?"checked":""}" title="Mark as got it" data-id="${it.id}"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button>
+              <button class="icon-btn edit-btn" title="Edit" data-id="${it.id}"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+              <button class="icon-btn delete-btn" title="Remove" data-id="${it.id}"><svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+            </div>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    qsa(".toggle-btn").forEach(b=> b.addEventListener("click", ()=> toggleItem(b.dataset.id)));
+    qsa(".edit-btn").forEach(b=> b.addEventListener("click", ()=> openEditModal(b.dataset.id)));
+    qsa(".delete-btn").forEach(b=> b.addEventListener("click", ()=> deleteItem(b.dataset.id)));
+  }
+
+  async function toggleItem(id){
+    const it = items.find(x=>x.id===id);
+    if(!it) return;
+    try{
+      await WishData.updateItem(id, { purchased: !it.purchased });
+      it.purchased = !it.purchased;
+      renderWishlist();
+      const newCard = document.querySelector(`.toggle-btn[data-id="${id}"]`)?.closest(".card");
+      if(newCard){ newCard.style.animationDelay = "0ms"; newCard.classList.add("pulse"); setTimeout(()=> newCard.classList.remove("pulse"), 500); }
+    }catch(err){ showToast("Couldn't update — check your connection."); console.error(err); }
+  }
+
+  async function deleteItem(id){
+    try{
+      await WishData.deleteItem(id);
+      items = items.filter(x=>x.id!==id);
+      renderWishlist();
+    }catch(err){ showToast("Couldn't delete — check your connection."); console.error(err); }
+  }
+
+  function openAddModal(){
+    editingItemId = null; editingImageData = null; editingWant = 3;
+    $("modalTitle").textContent = "Make a wish";
+    $("itemTitle").value=""; $("itemLink").value=""; $("itemPrice").value="";
+    $("itemNote").value="";
+    resetUploadZone();
+    renderWantPicker();
+    $("itemModalOverlay").classList.remove("hidden");
+  }
+  function openEditModal(id){
+    const it = items.find(x=>x.id===id);
+    if(!it) return;
+    editingItemId = id; editingImageData = it.image || null; editingWant = it.want || 3;
+    $("modalTitle").textContent = "Edit your wish";
+    $("itemTitle").value = it.title; $("itemLink").value = it.link||"";
+    $("itemPrice").value = it.price||"";
+    $("itemNote").value = it.note||"";
+    if(it.image){ $("uploadZoneContent").innerHTML = `<img src="${it.image}">`; } else { resetUploadZone(); }
+    renderWantPicker();
+    $("itemModalOverlay").classList.remove("hidden");
+  }
+  function resetUploadZone(){
+    $("uploadZoneContent").innerHTML = `<svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg><p>Upload a picture (optional)</p>`;
+  }
+
+  $("addItemBtn").addEventListener("click", openAddModal);
+  $("emptyAddBtn").addEventListener("click", openAddModal);
+  $("cancelModalBtn").addEventListener("click", ()=> $("itemModalOverlay").classList.add("hidden"));
+  $("itemModalOverlay").addEventListener("click", (e)=>{ if(e.target.id==="itemModalOverlay") $("itemModalOverlay").classList.add("hidden"); });
+
+  $("itemImageInput").addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    $("uploadZoneContent").innerHTML = `<p>Compressing image…</p>`;
+    try{
+      const dataUrl = await WishData.compressImage(file);
+      editingImageData = dataUrl;
+      $("uploadZoneContent").innerHTML = `<img src="${dataUrl}">`;
+    }catch(err){
+      showToast("Couldn't read that image.");
+      resetUploadZone();
+    }
+  });
+
+  $("saveItemBtn").addEventListener("click", async ()=>{
+    const title = $("itemTitle").value.trim();
+    if(!title){ $("itemTitle").focus(); return; }
+    const payload = {
+      title, link: $("itemLink").value.trim(),
+      price: $("itemPrice").value ? Number($("itemPrice").value) : 0,
+      want: editingWant,
+      note: $("itemNote").value.trim(),
+      image: editingImageData
+    };
+    $("saveItemBtn").disabled = true;
+    try{
+      const isNewWish = !editingItemId;
+      if(editingItemId){
+        await WishData.updateItem(editingItemId, payload);
+      } else {
+        await WishData.addItem(payload);
+      }
+      await reloadItems();
+      $("itemModalOverlay").classList.add("hidden");
+      if(isNewWish) WishWell.magicFromElement($("addItemBtn"));
+      if(!$("page-profile").classList.contains("hidden")) renderProfile();
+    }catch(err){
+      showToast("Couldn't save — check your connection.");
+      console.error(err);
+    } finally {
+      $("saveItemBtn").disabled = false;
+    }
+  });
+
+  function renderProfile(){
+    const av = me.avatar ? `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(me.displayName);
+    $("profileAvatarBig").innerHTML = av;
+    $("profileNameDisplay").textContent = me.displayName;
+    $("editDisplayName").value = me.displayName;
+    $("editBio").value = me.bio || "";
+    $("shareLink").value = new URL("index.html", window.location.href).href;
+
+    const got = items.filter(i=>i.purchased);
+    const active = items.filter(i=>!i.purchased);
+    $("statTotal").textContent = items.length;
+    $("statGot").textContent = got.length;
+    const activeValue = active.reduce((sum,i)=> sum + (Number(i.price)||0), 0);
+    $("statSpend").textContent = "₹" + activeValue.toLocaleString("en-IN");
+  }
+
+  $("copyShareBtn").addEventListener("click", async ()=>{
+    try{ await navigator.clipboard.writeText($("shareLink").value); showToast("Link copied"); }
+    catch(e){ $("shareLink").select(); showToast("Select and copy the link above"); }
+  });
+
+  $("avatarInput").addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    try{
+      const dataUrl = await WishData.compressImage(file, 400, 0.8);
+      await WishData.saveProfile({ avatar: dataUrl });
+      me.avatar = dataUrl;
+      renderProfile();
+      refreshUserChrome();
+    }catch(err){ showToast("Couldn't update your photo."); console.error(err); }
+  });
+
+  $("saveProfileBtn").addEventListener("click", async ()=>{
+    const displayName = $("editDisplayName").value.trim() || me.displayName;
+    const bio = $("editBio").value.trim();
+    try{
+      await WishData.saveProfile({ displayName, bio });
+      me.displayName = displayName; me.bio = bio;
+      refreshUserChrome();
+      renderProfile();
+      showToast("Profile saved");
+    }catch(err){ showToast("Couldn't save — check your connection."); console.error(err); }
+  });
+
+  /* ---------------- BOOT ---------------- */
+  auth.onAuthStateChanged(async (user)=>{
+    if(!user){ window.location.href = "login.html"; return; }
+    try{
+      me = await WishData.getProfile();
+      items = await WishData.getItems();
+      refreshUserChrome();
+      renderWishlist();
+      goToPage("wishlist");
+    }catch(err){
+      console.error(err);
+      showToast("Couldn't load your wishlist — check your connection.");
+    }
+  });
+})();
+</script>
+</body>
+</html>
