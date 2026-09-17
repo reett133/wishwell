@@ -1,3 +1,6 @@
+
+
+Index · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,9 +11,9 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
+ 
 <div class="starfield" id="starfield" aria-hidden="true"></div>
-
+ 
 <div id="app">
   <header class="sidebar">
     <div class="brand">
@@ -35,7 +38,7 @@
       </a>
     </div>
   </header>
-
+ 
   <main class="main">
     <div class="top-row">
       <div>
@@ -43,7 +46,7 @@
         <p class="subtitle" id="wishSub">Everything they're hoping for — pick something and make it real.</p>
       </div>
     </div>
-
+ 
     <div class="controls-row">
       <div class="tabs">
         <button class="tab active" data-filter="all">All</button>
@@ -57,7 +60,7 @@
         <option value="price_high">Price: high to low</option>
       </select>
     </div>
-
+ 
     <div id="loadingState" class="empty">Loading wishes…</div>
     <div class="grid hidden" id="itemGrid"></div>
     <div class="empty hidden" id="emptyState">
@@ -76,8 +79,9 @@
     <div id="errorState" class="empty hidden">Couldn't load the wishlist. Try refreshing.</div>
   </main>
 </div>
-
+ 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="data.js"></script>
@@ -87,11 +91,11 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   WishWell.initStarfield($("starfield"));
-
+ 
   let items = [];
   let currentFilter = "all";
   let currentSort = "newest";
-
+ 
   function fmtPrice(price){ return "₹" + (Number(price)||0).toLocaleString("en-IN"); }
   function budgetBadge(price){ price=Number(price)||0; if(price===0) return "No price set"; if(price<500) return "Under ₹500"; if(price<1500) return "₹500 – ₹1,500"; if(price<5000) return "₹1,500 – ₹5,000"; return "₹5,000+"; }
   function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -102,7 +106,7 @@
     for(let i=1;i<=5;i++) html += starSvg(i<=level);
     return html + '</div>';
   }
-
+ 
   Array.from(document.querySelectorAll(".tab")).forEach(tab=>{
     tab.addEventListener("click", ()=>{
       Array.from(document.querySelectorAll(".tab")).forEach(t=>t.classList.remove("active"));
@@ -112,7 +116,7 @@
     });
   });
   $("sortSelect").addEventListener("change", (e)=>{ currentSort = e.target.value; render(); });
-
+ 
   function render(){
     let list = items.filter(it=>{
       if(currentFilter==="active") return !it.purchased;
@@ -127,7 +131,7 @@
       const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
       return bt - at;
     });
-
+ 
     const grid = $("itemGrid");
     grid.innerHTML = "";
     if(list.length === 0){
@@ -137,7 +141,7 @@
     }
     grid.classList.remove("hidden");
     $("emptyState").classList.add("hidden");
-
+ 
     list.forEach((it, idx)=>{
       const card = document.createElement("div");
       card.className = "card card-enter" + (it.purchased ? " purchased" : "");
@@ -148,7 +152,7 @@
       const linkHtml = it.link
         ? `<a class="link-btn" href="${escapeHtml(it.link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>View</a>`
         : `<span style="font-size:0.78rem; color:var(--ink-soft);">No link added</span>`;
-
+ 
       card.innerHTML = `
         ${img}
         <div class="card-body">
@@ -164,7 +168,7 @@
       grid.appendChild(card);
     });
   }
-
+ 
   async function boot(){
     try{
       const [profile, loadedItems] = await Promise.all([WishData.getProfile(), WishData.getItems()]);
@@ -184,3 +188,4 @@
 </script>
 </body>
 </html>
+ 
