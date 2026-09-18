@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
- 
+
 <div class="starfield" id="starfield" aria-hidden="true"></div>
- 
+
 <div id="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -54,7 +54,7 @@
       </button>
     </div>
   </aside>
- 
+
   <main class="main">
     <section id="page-wishlist">
       <div class="top-row">
@@ -64,7 +64,7 @@
         </div>
         <button class="btn btn-primary" id="addItemBtn">+ Make a wish</button>
       </div>
- 
+
       <div class="controls-row">
         <div class="tabs">
           <button class="tab active" data-filter="all">All</button>
@@ -78,7 +78,7 @@
           <option value="price_high">Price: high to low</option>
         </select>
       </div>
- 
+
       <div id="loadingState" class="empty">Loading your wishes…</div>
       <div class="grid hidden" id="itemGrid"></div>
       <div class="empty hidden" id="emptyState">
@@ -97,12 +97,12 @@
         <button class="btn btn-primary" id="emptyAddBtn">+ Make a wish</button>
       </div>
     </section>
- 
+
     <section id="page-profile" class="hidden">
       <div class="top-row">
         <div><h1 class="serif">Profile</h1><p class="subtitle">This is what only you can see and edit.</p></div>
       </div>
- 
+
       <div class="share-box">
         <div class="label">Your public wishlist</div>
         <div class="share-row">
@@ -111,7 +111,7 @@
         </div>
         <p class="share-note">This link always shows your current wishlist live — anyone can open it, no login needed, and it updates the moment you change something here.</p>
       </div>
- 
+
       <div class="profile-card">
         <div class="profile-avatar-row">
           <div class="avatar-lg" id="profileAvatarBig"></div>
@@ -121,13 +121,13 @@
             <label class="avatar-upload-btn">Change photo<input type="file" id="avatarInput" accept="image/*" class="hidden"></label>
           </div>
         </div>
- 
+
         <div class="stats-row">
           <div class="stat"><div class="num" id="statTotal">0</div><div class="label">wishlist items</div></div>
           <div class="stat"><div class="num" id="statGot">0</div><div class="label">got it</div></div>
           <div class="stat"><div class="num" id="statSpend">₹0</div><div class="label">still wishing (value)</div></div>
         </div>
- 
+
         <div class="field"><label>Display name</label><input type="text" id="editDisplayName"></div>
         <div class="field"><label>About</label><textarea id="editBio" rows="3" placeholder="A little about you..."></textarea></div>
         <button class="btn btn-primary" id="saveProfileBtn">Save changes</button>
@@ -136,7 +136,7 @@
     </section>
   </main>
 </div>
- 
+
 <div class="modal-overlay hidden" id="itemModalOverlay">
   <div class="modal">
     <h2 id="modalTitle">Make a wish</h2>
@@ -161,9 +161,9 @@
     </div>
   </div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -176,7 +176,7 @@
   const $ = (id) => document.getElementById(id);
   const qsa = (sel) => Array.from(document.querySelectorAll(sel));
   WishWell.initStarfield($("starfield"));
- 
+
   let me = { displayName: "Riri", bio: "", avatar: null };
   let items = [];
   let editingItemId = null;
@@ -184,7 +184,7 @@
   let editingWant = 3;
   let currentFilter = "all";
   let currentSort = "newest";
- 
+
   function showToast(msg){
     const t = $("toast");
     t.textContent = msg;
@@ -194,20 +194,7 @@
   }
   function initials(name){ return (name||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||"").join(""); }
   function fmtPrice(price){ return "₹" + (Number(price)||0).toLocaleString("en-IN"); }
-  function budgetBadge(price){
-    price = Number(price) || 0;
-    if(price === 0) return "No price set";
-    if(price < 200) return "Under ₹200";
-    if(price < 500) return "₹200 – ₹500";
-    if(price < 1000) return "₹500 – ₹1,000";
-    if(price < 1500) return "₹1,000 – ₹1,500";
-    if(price < 2000) return "₹1,500 – ₹2,000";
-    if(price < 3000) return "₹2,000 – ₹3,000";
-    if(price < 4000) return "₹3,000 – ₹4,000";
-    if(price < 5000) return "₹4,000 – ₹5,000";
-    if(price < 6000) return "₹5,000 – ₹6,000";
-    return "₹6,000+";
-  }
+  function budgetBadge(price){ price=Number(price)||0; if(price===0) return "No price set"; if(price<500) return "Under ₹500"; if(price<1500) return "₹500 – ₹1,500"; if(price<5000) return "₹1,500 – ₹5,000"; return "₹5,000+"; }
   function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
   const starSvg = () => `<svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg>`;
   function wantStarsDisplay(level){
@@ -216,7 +203,7 @@
     for(let i=1;i<=5;i++) html += `<svg viewBox="0 0 24 24" class="${i<=level?'filled':''}" stroke-width="1.6"><path d="M12 3l2.5 5.5L20 9l-4.5 4 1 6L12 16l-4.5 3 1-6L4 9l5.5-.5L12 3z" stroke-linejoin="round"/></svg>`;
     return html + '</div>';
   }
- 
+
   function renderWantPicker(){
     const el = $("wantPicker");
     el.innerHTML = "";
@@ -233,20 +220,20 @@
     label.textContent = editingWant + " / 5";
     el.appendChild(label);
   }
- 
+
   function logOut(){
     auth.signOut().then(()=>{ window.location.href = "login.html"; });
   }
   $("logoutBtn").addEventListener("click", logOut);
   $("logoutBtn2").addEventListener("click", logOut);
- 
+
   function refreshUserChrome(){
     const av = me.avatar ? `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(me.displayName);
     $("miniAvatar").innerHTML = av;
     $("miniName").textContent = me.displayName;
     $("wishHeading").textContent = me.displayName.split(" ")[0] + "'s Wishlist";
   }
- 
+
   function goToPage(page){
     qsa(".nav-item[data-page]").forEach(b=> b.classList.toggle("active", b.dataset.page===page));
     $("page-wishlist").classList.toggle("hidden", page!=="wishlist");
@@ -256,7 +243,7 @@
   }
   qsa(".nav-item[data-page]").forEach(btn=> btn.addEventListener("click", ()=> goToPage(btn.dataset.page)));
   $("menuToggle").addEventListener("click", ()=> $("sidebar").classList.toggle("open"));
- 
+
   qsa(".tab").forEach(tab=>{
     tab.addEventListener("click", ()=>{
       qsa(".tab").forEach(t=>t.classList.remove("active"));
@@ -266,12 +253,12 @@
     });
   });
   $("sortSelect").addEventListener("change", (e)=>{ currentSort = e.target.value; renderWishlist(); });
- 
+
   async function reloadItems(){
     items = await WishData.getItems();
     renderWishlist();
   }
- 
+
   function renderWishlist(){
     let list = items.filter(it=>{
       if(currentFilter==="active") return !it.purchased;
@@ -286,7 +273,7 @@
       const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
       return bt - at;
     });
- 
+
     const grid = $("itemGrid");
     grid.innerHTML = "";
     $("loadingState").classList.add("hidden");
@@ -297,7 +284,7 @@
     }
     grid.classList.remove("hidden");
     $("emptyState").classList.add("hidden");
- 
+
     list.forEach((it, idx)=>{
       const card = document.createElement("div");
       card.className = "card card-enter" + (it.purchased ? " purchased" : "");
@@ -308,7 +295,7 @@
       const linkHtml = it.link
         ? `<a class="link-btn" href="${escapeHtml(it.link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>View</a>`
         : `<span style="font-size:0.78rem; color:var(--ink-soft);">No link added</span>`;
- 
+
       card.innerHTML = `
         ${img}
         <div class="card-body">
@@ -330,12 +317,12 @@
         </div>`;
       grid.appendChild(card);
     });
- 
+
     qsa(".toggle-btn").forEach(b=> b.addEventListener("click", ()=> toggleItem(b.dataset.id)));
     qsa(".edit-btn").forEach(b=> b.addEventListener("click", ()=> openEditModal(b.dataset.id)));
     qsa(".delete-btn").forEach(b=> b.addEventListener("click", ()=> deleteItem(b.dataset.id)));
   }
- 
+
   async function toggleItem(id){
     const it = items.find(x=>x.id===id);
     if(!it) return;
@@ -347,7 +334,7 @@
       if(newCard){ newCard.style.animationDelay = "0ms"; newCard.classList.add("pulse"); setTimeout(()=> newCard.classList.remove("pulse"), 500); }
     }catch(err){ showToast("Couldn't update — check your connection."); console.error(err); }
   }
- 
+
   async function deleteItem(id){
     try{
       await WishData.deleteItem(id);
@@ -355,7 +342,7 @@
       renderWishlist();
     }catch(err){ showToast("Couldn't delete — check your connection."); console.error(err); }
   }
- 
+
   function openAddModal(){
     editingItemId = null; editingImageData = null; editingWant = 3;
     $("modalTitle").textContent = "Make a wish";
@@ -380,12 +367,12 @@
   function resetUploadZone(){
     $("uploadZoneContent").innerHTML = `<svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg><p>Upload a picture (optional)</p>`;
   }
- 
+
   $("addItemBtn").addEventListener("click", openAddModal);
   $("emptyAddBtn").addEventListener("click", openAddModal);
   $("cancelModalBtn").addEventListener("click", ()=> $("itemModalOverlay").classList.add("hidden"));
   $("itemModalOverlay").addEventListener("click", (e)=>{ if(e.target.id==="itemModalOverlay") $("itemModalOverlay").classList.add("hidden"); });
- 
+
   $("itemImageInput").addEventListener("change", async (e)=>{
     const file = e.target.files[0];
     if(!file) return;
@@ -399,7 +386,7 @@
       resetUploadZone();
     }
   });
- 
+
   $("saveItemBtn").addEventListener("click", async ()=>{
     const title = $("itemTitle").value.trim();
     if(!title){ $("itemTitle").focus(); return; }
@@ -429,7 +416,7 @@
       $("saveItemBtn").disabled = false;
     }
   });
- 
+
   function renderProfile(){
     const av = me.avatar ? `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(me.displayName);
     $("profileAvatarBig").innerHTML = av;
@@ -437,7 +424,7 @@
     $("editDisplayName").value = me.displayName;
     $("editBio").value = me.bio || "";
     $("shareLink").value = new URL("index.html", window.location.href).href;
- 
+
     const got = items.filter(i=>i.purchased);
     const active = items.filter(i=>!i.purchased);
     $("statTotal").textContent = items.length;
@@ -445,12 +432,12 @@
     const activeValue = active.reduce((sum,i)=> sum + (Number(i.price)||0), 0);
     $("statSpend").textContent = "₹" + activeValue.toLocaleString("en-IN");
   }
- 
+
   $("copyShareBtn").addEventListener("click", async ()=>{
     try{ await navigator.clipboard.writeText($("shareLink").value); showToast("Link copied"); }
     catch(e){ $("shareLink").select(); showToast("Select and copy the link above"); }
   });
- 
+
   $("avatarInput").addEventListener("change", async (e)=>{
     const file = e.target.files[0];
     if(!file) return;
@@ -462,7 +449,7 @@
       refreshUserChrome();
     }catch(err){ showToast("Couldn't update your photo."); console.error(err); }
   });
- 
+
   $("saveProfileBtn").addEventListener("click", async ()=>{
     const displayName = $("editDisplayName").value.trim() || me.displayName;
     const bio = $("editBio").value.trim();
@@ -474,7 +461,7 @@
       showToast("Profile saved");
     }catch(err){ showToast("Couldn't save — check your connection."); console.error(err); }
   });
- 
+
   /* ---------------- BOOT ---------------- */
   auth.onAuthStateChanged(async (user)=>{
     if(!user){ window.location.href = "login.html"; return; }
@@ -493,4 +480,3 @@
 </script>
 </body>
 </html>
- 
