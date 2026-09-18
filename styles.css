@@ -278,7 +278,7 @@ a{color:inherit;}
 .card:nth-child(3n){ --tilt:-1.1deg; }
 .card:nth-child(3n+1){ --tilt:0.7deg; }
 .card:nth-child(3n+2){ --tilt:-0.4deg; }
-.card:hover{ transform:rotate(0deg) translateY(-6px); box-shadow:0 26px 54px -18px rgba(10,5,20,0.6); z-index:2; }
+.card:hover{ transform:rotate(0deg) translateY(-10px) scale(1.03); box-shadow:0 30px 60px -18px rgba(10,5,20,0.65); z-index:2; }
 .card.purchased{opacity:0.68;}
 .card.card-enter{ animation:cardEnter .5s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes cardEnter{
